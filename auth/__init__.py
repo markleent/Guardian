@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
-
-from config import *
 import importlib
-import hash
-from validator.simplevalidator import *
-from authexception import AuthException
-
+import auth.hash
+from auth.authexception import AuthException
+from auth.config import *
 ### Importing UserModel from config
 UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
 Session = importlib.import_module(G_SESSION).Session
 
+import validator
 
 """ Just in case i want to switch from Flask built in sessions to a db based session """
 
@@ -106,5 +104,3 @@ class Guardian(object):
 
     def check(self):
         return self.session.haskey('username')
-
-
