@@ -19,4 +19,4 @@ def make(word):
         return output.decode(encoding='utf-8')
 
 def check(word, hash):
-    return bcrypt.hashpw(word, hash).decode('utf-8') == hash
+    return bcrypt.hashpw(word.encode('utf-8'), hash.encode('utf-8')).decode('utf-8') == hash

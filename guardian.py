@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
+from config import *
 import importlib
 import hash
-
+import validator.validator as validator
 from authexception import AuthException
-from config import *
 
 ### Importing UserModel from config
 UserModel = importlib.import_module(G_MODEL).UserModel
@@ -15,17 +17,15 @@ Session = importlib.import_module(G_SESSION).Session
 """ Or in case i want to switch from my sql Model, to a real ORM """
 
 class Guardian(object):
-    db = None
-    def __init__(self, db = None):
-        if db is not None:
-            self.set_db(db)
-
+    def __init__(self):
+        self.db = None
         self.auth_user = None
-        self.session = Session()
+        self.set_settings()
 
-    def set_db(self, db):
-        self.db = db
+    def set_settings(self, db = None):
+        self.db = db if db else G_DATABASE
         self.UserModel = UserModel(db = self.db)
+        self.session = Session()
 
     def __user_exists(self, username):
         return self.UserModel.find_by_username(username)
@@ -37,21 +37,23 @@ class Guardian(object):
         username = kwargs.get('username', None)
         password = kwargs.get('password', None)
 
-        if username is None or username == '':
-            raise AuthException('Username is missing')
-    
-        if password is None or password == '':
-            raise AuthException('Password is missing')
 
-        encPass = hashlib.sha512(password).hexdigest()
+        validate = validator.Validator(fields = kwargs, rules = {
+            'username' : 'required', 
+            'password': 'required',
+        })
+
+        if validate.fails():
+            raise AuthException(validate.errors()[0])
 
         user = self.__user_exists(username)
 
         if user is not None:
-            if user.password == encPass:
-                return True, [username, user.role]           
+            if hash.check(password, user.password):
+                self.auth_user = user
+                return True, [user.username, user.role]           
 
-        raise AuthException('Username does not exist !') 
+        raise AuthException('Username or password incorrect') 
 
     def create(self, **kwargs):
         if self.db is None:
