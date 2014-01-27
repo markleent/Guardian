@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-import os
-
-PACKAGE_PARENT = '..'
-SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
-sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
-
 import importlib
 import auth.hash
 from auth.authexception import AuthException
@@ -16,7 +9,7 @@ UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
 Session = importlib.import_module(G_SESSION).Session
 
-from validator import simplevalidator
+from ..validation.simplevalidator import Validator
 
 class Guardian(object):
     def __init__(self):
