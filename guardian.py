@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+#from __future__ import absolute_import
 
 from config import *
 import importlib
 import hash
-import validator.validator as validator
+import validator
 from authexception import AuthException
 
 ### Importing UserModel from config
@@ -38,7 +39,7 @@ class Guardian(object):
         password = kwargs.get('password', None)
 
 
-        validate = validator.Validator(fields = kwargs, rules = {
+        validate = Validator(fields = kwargs, rules = {
             'username' : 'required', 
             'password': 'required',
         })
