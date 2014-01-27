@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
+import sys
+import os
+
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+
 import importlib
 import auth.hash
 from auth.authexception import AuthException
 from auth.config import *
+
 ### Importing UserModel from config
 UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
 Session = importlib.import_module(G_SESSION).Session
 
-import validator
-
-""" Just in case i want to switch from Flask built in sessions to a db based session """
-
-""" Or in case i want to switch from my sql Model, to a real ORM """
+from validator import simplevalidator
 
 class Guardian(object):
     def __init__(self):
