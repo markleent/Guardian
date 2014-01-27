@@ -1,3 +1,3 @@
 DATABASE = 'test.db'
-MODEL = 'models.usersqlite3'
-SESSION = 'session.flasksession'
+G_MODEL = 'models.usersqlite3'
+G_SESSION = 'session.flasksession'

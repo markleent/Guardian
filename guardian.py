@@ -5,9 +5,9 @@ from authexception import AuthException
 from config import *
 
 ### Importing UserModel from config
-UserModel = importlib.import_module(MODEL).UserModel
+UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
-Session = importlib.import_module(SESSION).Session
+Session = importlib.import_module(G_SESSION).Session
 
 
 """ Just in case i want to switch from Flask built in sessions to a db based session """
