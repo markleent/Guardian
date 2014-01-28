@@ -9,7 +9,7 @@ UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
 #Session = importlib.import_module(G_SESSION).Session
 
-from validation import simplevalidator
+import simplevalidator
 
 class Guardian(object):
     def __init__(self):
