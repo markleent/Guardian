@@ -39,5 +39,13 @@ class AuthTests(unittest.TestCase):
             self.assertRaisesRegexp(e, 'username is required')
 
 
+    def test_creaste_validation_fail(self):
+
+        try:
+            Guard.authenticate(username = "", password = "password")
+        except auth.AuthException as e:
+            self.assertRaisesRegexp(e, 'username is required')
+
+
 if __name__ == '__main__':
     unittest.main()

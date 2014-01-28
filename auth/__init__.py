@@ -58,11 +58,14 @@ class Guardian(object):
         password = kwargs.get('password', None)
         role = kwargs.get('role', 0)
 
-        if username is None or username == '':
-            raise AuthException('Username is missing')
-    
-        if password is None or password == '':
-            raise AuthException('Password is missing')
+        
+        validate = simplevalidator.Validator(fields = kwargs, rules = {
+            'username' : 'required', 
+            'password': 'required',
+        })
+
+        if validate.fails():
+            raise AuthException(validate.errors()[0])
 
         if role is None or (role != '1' and role != '0'):
             role = 0
@@ -70,7 +73,7 @@ class Guardian(object):
         if self.__user_exists(username) is not None:
             raise AuthException('This username already exists')
 
-        encPass = hashlib.sha512(password).hexdigest()
+        encPass = hash.make(password)
 
         return self.UserModel.create(username = username, password = encPass, role = role)
 
