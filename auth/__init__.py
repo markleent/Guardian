@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import importlib
-import auth.hash
-from auth.authexception import AuthException
-from auth.config import *
+import auth.hasher as hash
+from .authexception import AuthException
+from .config import *
 
 ### Importing UserModel from config
 UserModel = importlib.import_module(G_MODEL).UserModel
