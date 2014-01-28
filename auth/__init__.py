@@ -20,7 +20,7 @@ class Guardian(object):
     def set_settings(self, db = None):
         self.db = db if db else G_DATABASE
         self.UserModel = UserModel(db = self.db)
-        self.session = Session()
+        #self.session = Session()
 
     def __user_exists(self, username):
         return self.UserModel.find_by_username(username)
