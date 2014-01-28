@@ -7,7 +7,7 @@ from auth.config import *
 ### Importing UserModel from config
 UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
-Session = importlib.import_module(G_SESSION).Session
+#Session = importlib.import_module(G_SESSION).Session
 
 from validation import simplevalidator
 
@@ -99,5 +99,5 @@ class Guardian(object):
         #self.session.unset('username')
         #self.session.unset('role')
 
-    def check(self):
-        return self.session.haskey('username')
+    #def check(self):
+    #    return self.session.haskey('username')
