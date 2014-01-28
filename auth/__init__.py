@@ -9,7 +9,7 @@ UserModel = importlib.import_module(G_MODEL).UserModel
 ### Importing Session from config
 Session = importlib.import_module(G_SESSION).Session
 
-from ..validation.simplevalidator import Validator
+from validation import simplevalidator
 
 class Guardian(object):
     def __init__(self):
@@ -33,7 +33,7 @@ class Guardian(object):
         password = kwargs.get('password', None)
 
 
-        validate = Validator(fields = kwargs, rules = {
+        validate = simplevalidator.Validator(fields = kwargs, rules = {
             'username' : 'required', 
             'password': 'required',
         })
