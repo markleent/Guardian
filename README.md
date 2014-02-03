@@ -1,6 +1,8 @@
 Guardian
 ========
 
+[![Build Status](https://travis-ci.org/markleent/Guardian.png?branch=master)](https://travis-ci.org/markleent/Guardian)
+
 A work in progress, framework independant (with, hopefully some provided adapters !), simple Web Auth System in Python !
 
 Here is the list of things i intend to integrate:
