@@ -4,6 +4,7 @@ python:
   - "3.3"
 # command to install dependencies
 install:
+   - "pip install coveralls"
    - "pip install bcrypt"
    - "pip install simpleValidator"
    - "pip install pymongo"
@@ -13,4 +14,6 @@ install:
 # command to run tests
 services: mongodb
 script: 
-  - python tests.py
+  - coverage run --source=auth setup.py test
+after_success:
+  - coveralls
