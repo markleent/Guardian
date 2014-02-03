@@ -1,7 +1,9 @@
 from flask import session
 
 class Session:
-   
+    def __init__(self, db = None):
+        pass
+        
     def set(self, item, value):
         session[item] = value
 

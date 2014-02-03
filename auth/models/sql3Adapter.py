@@ -34,12 +34,6 @@ class UserModel:
         self.password = kwargs.get('password', None)
         self.role = kwargs.get('role', None)
         return self.save()
-        
-
-    ### For testing purpose only, this is not supposed to work ###
-    def all(self, ):
-        users = self.db.execute('SELECT * from users').fetch()
-        return users
 
 
     def find(self, id):

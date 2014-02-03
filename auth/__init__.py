@@ -2,12 +2,13 @@
 import importlib
 import auth.hasher as hash
 from .authexception import AuthException
-from .config import *
+import auth.config
 
 ### Importing UserModel from config
-UserModel = importlib.import_module(G_MODEL).UserModel
+UserModel = importlib.import_module(config.G_MODEL).UserModel
 ### Importing Session from config
-#Session = importlib.import_module(G_SESSION).Session
+if config.USE_SESSION:
+    Session = importlib.import_module(G_SESSION).Session
 
 import simplevalidator
 
@@ -18,17 +19,15 @@ class Guardian(object):
         self.set_settings()
 
     def set_settings(self, db = None):
-        self.db = db if db else G_DATABASE
+        self.db = db if db else config.G_DATABASE_POINTER
         self.UserModel = UserModel(db = self.db)
-        #self.session = Session()
+        if config.USE_SESSION:
+            self.session = Session()
 
     def __user_exists(self, username):
         return self.UserModel.find_by_username(username)
 
     def authenticate(self, **kwargs):
-        if self.db is None:
-            raise AuthException('Could not connect to the database')
-
         username = kwargs.get('username', None)
         password = kwargs.get('password', None)
 
@@ -51,14 +50,10 @@ class Guardian(object):
         raise AuthException('Username or password incorrect') 
 
     def create(self, **kwargs):
-        if self.db is None:
-            raise AuthException('Could not connect to the database')
-
         username = kwargs.get('username', None)
         password = kwargs.get('password', None)
         role = kwargs.get('role', 0)
 
-        
         validate = simplevalidator.Validator(fields = kwargs, rules = {
             'username' : 'required', 
             'password': 'required',
