@@ -1,5 +1,3 @@
-import sqlite3
-
 class UserModel:
 
     def __init__(self, **kwargs):
@@ -37,6 +35,11 @@ class UserModel:
 
         return self
 
+    def delete(self):
+        self.users.delete({'usernae': self.username})
+        self.__reset()
+
+
     def create(self, **kwargs):
         self.id = None
         self.username = kwargs.get('username', None)
@@ -63,6 +66,11 @@ class UserModel:
 
         return None
 
+    def __reset(self):
+        self.id = None
+        self.username = None
+        self.password = None
+        self.role = None
 
     def __populate(self, data):
         self.id = data['_id']

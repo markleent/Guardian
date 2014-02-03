@@ -52,6 +52,14 @@ class UserModel:
 
         return None
 
+
+    def __reset(self):
+        self.id = None
+        self.username = None
+        self.password = None
+        self.role = None
+
+
     def __populate(self, data):
         self.id = data['id']
         self.username = data['username']
