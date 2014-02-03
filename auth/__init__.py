@@ -12,6 +12,8 @@ if config.USE_SESSION:
 
 import simplevalidator
 
+__version__ = "0.0.1"
+
 class Guardian(object):
     def __init__(self):
         self.db = None
