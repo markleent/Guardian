@@ -195,12 +195,6 @@ class AuthSessionDefaults:
 
     def test_session_pass(self):
         with self.app:
-            try:
-                print(self.app.name)
-            except Exception:
-                pass
-                
-
             Auth.login('admin', 'password')
             self.assertTrue(Auth.session.get('user_id'))
 
@@ -224,6 +218,7 @@ class AuthTestsSQL3_DICT(unittest.TestCase, AuthSessionDefaults):
     @classmethod
     def tearDownClass(cls):
         auth.config.G_DATABASE_POINTER.close()
+        Auth.logout()
 
     def setUp(self):
         self.app = mock_context
@@ -239,13 +234,15 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
         auth.config.G_MODEL = 'sqlite3'
         auth.config.G_SESSION = 'Flask'
         Auth.set_settings()
+        cls.app = flaskapp.app.test_request_context('/test')
 
     @classmethod
     def tearDownClass(cls):
         auth.config.G_DATABASE_POINTER.close()
+        with cls.app:
+            Auth.logout()
 
     def setUp(self):
-        self.app = flaskapp.app.test_request_context('/test')
         with self.app:
             Auth.logout()
 
