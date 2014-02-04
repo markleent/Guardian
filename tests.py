@@ -8,7 +8,7 @@ import unittest
 import sys
 
 
-engine = create_engine('sqlite:///test.db', echo=True)
+engine = create_engine('sqlite:///test.db', echo=False)
 
 class AuthTestsSQL3(unittest.TestCase):
     
@@ -70,7 +70,7 @@ class AuthTestsMONGO(unittest.TestCase):
         database = _client['Guardian_test_db']
 
         ### Hacky solution but this is for the test only, while it might not be beautiful pythonic code
-        ### atleast it actually works ;) that it actually works/switch on the fly !
+        ### atleast it actually works ;)
         from auth.models.mongoAdapter import UserModel
         setattr(auth, 'UserModel', UserModel)
 
@@ -129,7 +129,7 @@ class AuthTestsSQLalchemy(unittest.TestCase):
     
     def setUp(self):
         ### Hacky solution but this is for the test only, while it might not be beautiful pythonic code
-        ### atleast it actually works ;) that it actually works/switch on the fly !
+        ### atleast it actually works ;)
         from auth.models.alchemyAdapter import UserModel
         setattr(auth, 'UserModel', UserModel)
 
