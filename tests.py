@@ -6,11 +6,13 @@ from sqlalchemy import create_engine
 import auth
 import unittest
 import sys
+import flaskapp
+from mock import Mock
 
 Auth = auth.Guardian()
 
-
-class AuthTestsDefaults:
+### Models Tests
+class AuthModelsDefaults:
 
     def test_authenticate_pass(self):
 
@@ -38,7 +40,6 @@ class AuthTestsDefaults:
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
-
     def test_creaste_validation_fail(self):
 
         try:
@@ -55,6 +56,8 @@ class AuthTestsDefaults:
         Auth.authenticate(username = "admin", password = "password")
         self.assertTrue(Auth.user().username == 'admin')
 
+    ### Note the following method are just to test that the decorator is fired
+    ### It is not the final test !
     def test_check_decorator_not_logged_in(self):
 
         @Auth.require_login
@@ -63,7 +66,8 @@ class AuthTestsDefaults:
 
         self.assertTrue("You are being redirected !!" == test_this())
 
-
+    ### Note the following method are just to test that the decorator is fired
+    ### It is not the final test !
     def test_check_decorator_logged_in(self):
 
         Auth.login('admin', 'password')
@@ -92,20 +96,27 @@ class AuthTestsDefaults:
 
         self.assertTrue(Auth.create(username = "test_user", password = "password"))
 
-        self.assertTrue(Auth.login(username = "test_user", password = "password"))
+        self.assertTrue(Auth.login("test_user", "password"))
 
         self.assertTrue(Auth.user().delete())
 
-    def teste_create_user_already_exists(self):
+    def test_create_user_already_exists(self):
 
         try:
             Auth.create(username = "admin", password = "mynewpassword !!!")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'This username already exists')
 
+    def test_user_set_get(self):
+
+        Auth.login('admin', 'password')
+
+        Auth.user().set('car', 32)
+
+        self.assertTrue(Auth.user().get('car') == 32)
 
 
-class AuthTestsSQL3(unittest.TestCase, AuthTestsDefaults):
+class AuthTestsSQL3(unittest.TestCase, AuthModelsDefaults):
 
     @classmethod
     def setUpClass(cls):
@@ -124,7 +135,7 @@ class AuthTestsSQL3(unittest.TestCase, AuthTestsDefaults):
 
 
 
-class AuthTestsMONGO(unittest.TestCase, AuthTestsDefaults):
+class AuthTestsMONGO(unittest.TestCase, AuthModelsDefaults):
 
     @classmethod
     def setUpClass(cls):
@@ -146,7 +157,7 @@ class AuthTestsMONGO(unittest.TestCase, AuthTestsDefaults):
         Auth.create(username = 'admin', password = 'password')
 
 
-class AuthTestsSQLalchemy(unittest.TestCase, AuthTestsDefaults):
+class AuthTestsSQLalchemy(unittest.TestCase, AuthModelsDefaults):
     
     @classmethod
     def setUpClass(cls):
@@ -164,7 +175,101 @@ class AuthTestsSQLalchemy(unittest.TestCase, AuthTestsDefaults):
     def setUp(self):
         Auth.logout()
 
+### Session Tests, in these tests we don't need to test each model implementations (as they are decoupled anyway)
+### So we will use the default sqlite3 for the time being
 
+### the dict/null session adapter doesn't need any context (as it is purely stateless)
+### But to be able to test the suite without having to duplicate code, it is needed
+mock_context = Mock()
+mock_context.__enter__ = Mock(return_value='I am in')
+mock_context.__exit__ = Mock(return_value=False)
+
+class AuthSessionDefaults:
+
+    def test_session_empty(self):
+        with self.app:
+            try:
+                Auth.session.get('user_id')
+            except AttributeError as e:
+                self.assertRaisesRegexp(e, 'Attribute is not a valid Session key')
+
+    def test_session_pass(self):
+        with self.app:
+            Auth.login('admin', 'password')
+
+            self.assertTrue(Auth.session.get('user_id'))
+
+    def test_session_set(self):
+        with self.app:
+            Auth.login('admin', 'password')
+
+            Auth.session.set('test', True)
+
+            self.assertTrue(Auth.session.get('test'))
+
+
+class AuthTestsSQL3_DICT(unittest.TestCase, AuthSessionDefaults):
+
+    @classmethod
+    def setUpClass(cls):
+        auth.config.G_DATABASE_POINTER = connect_db('test.db')
+        auth.config.G_MODEL = 'sqlite3'
+        auth.config.G_SESSION = 'dict'
+        Auth.set_settings()
+
+
+    @classmethod
+    def tearDownClass(cls):
+        auth.config.G_DATABASE_POINTER.close()
+
+    def setUp(self):
+        self.app = mock_context
+        Auth.logout()
+
+
+
+class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
+
+    @classmethod
+    def setUpClass(cls):
+        auth.config.G_DATABASE_POINTER = connect_db('test.db')
+        auth.config.G_MODEL = 'sqlite3'
+        auth.config.G_SESSION = 'Flask'
+
+        Auth.set_settings()
+
+    @classmethod
+    def tearDownClass(cls):
+        auth.config.G_DATABASE_POINTER.close()
+
+    def setUp(self):
+        self.app = flaskapp.app.test_request_context('/test')
+
+        with self.app:
+            Auth.logout()
+
+
+
+
+"""
+###Not yet implemented !
+class AuthTestsSQL3_TORNADO(unittest.TestCase, AuthSessionDefaults):
+
+    @classmethod
+    def setUpClass(cls):
+        auth.config.G_DATABASE_POINTER = connect_db('test.db')
+        auth.config.G_MODEL = 'sqlite3'
+        auth.config.G_SESSION = 'dict'
+
+        Auth.set_settings()
+
+    @classmethod
+    def tearDownClass(cls):
+        auth.config.G_DATABASE_POINTER.close()
+
+    def setUp(self):
+        Auth.logout()
+"""
 
 if __name__ == '__main__':
     unittest.main()

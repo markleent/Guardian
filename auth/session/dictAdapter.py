@@ -9,7 +9,10 @@ class Session(dict):
         setattr(self, item, None)
 
     def get(self, item):
-        return self.item
+        if self.haskey(item):
+            return getattr(self, item)
+
+        raise AttributeError('Attribute is not a valid Session key')
 
     def haskey(self, item):
         return hasattr(self, item)

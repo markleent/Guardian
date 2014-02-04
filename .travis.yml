@@ -4,6 +4,7 @@ python:
   - "3.3"
 # command to install dependencies
 install:
+   - "pip install mock"
    - "pip install coveralls"
    - "pip install bcrypt"
    - "pip install simpleValidator"

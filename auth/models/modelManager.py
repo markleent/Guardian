@@ -20,7 +20,7 @@ class mManager(object):
             self.set_model(adapter)
 
     def set_model(self, adapter = None):
-        model_adapter = adapter if adapter else config.G_MODEL
+        model_adapter = adapter if adapter else auth.config.G_MODEL
         self.model = getattr(current_module, ADAPTERS[model_adapter]).UserModel
 
         return self.model

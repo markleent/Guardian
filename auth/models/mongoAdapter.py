@@ -9,10 +9,10 @@ class UserModel:
         self.role = kwargs.get('role', None)
 
     def set(self, item, value):
-        self.item = value
+        setattr(self, item, value)
 
     def get(self, item):
-        return self.item
+        return getattr(self, item)
 
     def save(self):
         

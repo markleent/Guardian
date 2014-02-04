@@ -1,13 +1,31 @@
 import sys
 import auth.config
+import logging
 
-### We don't want unecessary import here :)
-if auth.config.G_SESSION == 'dict':
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
+
+try:
     import auth.session.dictAdapter as dictAdapter
-elif  auth.config.G_SESSION == 'Flask':
-    import auth.session.flaskAdapter as fkaskAdapter
-elif  auth.config.G_SESSION == 'tornado':
+except ImportError:
+    if auth.config.DEBUG:
+        logging.warning('Import Error: %s', 'Null Session (dictAdapter) could not be imported, please check if you need this')
+    pass
+
+try:
+    import auth.session.flaskAdapter as flaskAdapter
+except ImportError:
+    if config.DEBUG:
+        logging.warning('Import Error: %s', 'flask Session (flaskAdapter) could not be imported, please check if you need this')
+    pass
+
+try:
     import auth.session.tornadoAdapter as tornadoAdapter
+except ImportError:
+    if auth.auth.config.DEBUG:
+        logging.warning('Import Error: %s', 'tornado Session (tornadoAdapter) could not be imported, please check if you need this')
+    pass
+
 
 ADAPTERS = {
     'dict': 'dictAdapter',
@@ -25,7 +43,7 @@ class sManager(object):
             self.set_model(adapter)
 
     def set_session(self, adapter = None):
-        sess_adapter = adapter if adapter else config.G_SESSION
+        sess_adapter = adapter if adapter else auth.config.G_SESSION
         self.adapter = getattr(current_module, ADAPTERS[sess_adapter]).Session
 
         return self.adapter
