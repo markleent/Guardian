@@ -177,7 +177,14 @@ class AuthModelsDefaults:
         ### Load user
         user = self.mManager.find_by_username('admin')
 
-        self.assertTrue(Auth.login_user(user))
+
+        self.assertTrue(Auth.login_user(user) == True)
+
+        ### these assertion, are frankly redondant, no code smell here, i am just trying
+        ### to improve code coverage (for some reasons, Coverall do not count them)
+        self.assertTrue(Auth.auth_user)
+
+        self.assertTrue(Auth.session.get('user_id'))
 
         ### check that we are indeed logged as admin
         self.assertTrue(Auth.check())
