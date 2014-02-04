@@ -7,34 +7,40 @@ import auth
 import unittest
 import sys
 
-
-engine = create_engine('sqlite:///test.db', echo=False)
+Auth = auth.Guardian()
 
 class AuthTestsSQL3(unittest.TestCase):
-    
-    def setUp(self):
+
+    @classmethod
+    def setUpClass(cls):
         auth.config.G_DATABASE_POINTER = connect_db('test.db')
+        auth.config.G_MODEL = 'sqlite3'
+        auth.config.G_SESSION = 'dict'
 
-        from auth.models.sql3Adapter import UserModel
-        setattr(auth, 'UserModel', UserModel)
+        Auth.set_settings()
 
-        self.Guard = auth.Guardian()
+    @classmethod
+    def tearDownClass(cls):
+        auth.config.G_DATABASE_POINTER.close()
+
+    def setUp(self):
+        Auth.logout()
 
     def test_authenticate_pass(self):
 
-        self.assertTrue(self.Guard.authenticate(username = "admin", password = "password"))
+        self.assertTrue(Auth.authenticate(username = "admin", password = "password"))
 
     def test_authenticate_fail(self):
 
         try:
-            self.Guard.authenticate(username = "admin", password = "password2")
+            Auth.authenticate(username = "admin", password = "password2")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'Username or password incorrect')
 
     def test_authenticate_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "")
+            Auth.authenticate(username = "", password = "")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'password is required')
 
@@ -42,7 +48,7 @@ class AuthTestsSQL3(unittest.TestCase):
     def test_authenticate_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "password")
+            Auth.authenticate(username = "", password = "password")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
@@ -50,22 +56,22 @@ class AuthTestsSQL3(unittest.TestCase):
     def test_creaste_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "password")
+            Auth.authenticate(username = "", password = "password")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
     def test_empty_auth(self):
 
-        self.assertFalse(self.Guard.user())
+        self.assertFalse(Auth.user())
 
     def test_auth_user(self):
 
-        self.Guard.authenticate(username = "admin", password = "password")
-        self.assertTrue(self.Guard.user().username == 'admin')
+        Auth.authenticate(username = "admin", password = "password")
+        self.assertTrue(Auth.user().username == 'admin')
 
     def test_check_decorator_not_logged_in(self):
 
-        @self.Guard.require_login
+        @Auth.require_login
         def test_this():
             return "i am logged in"
 
@@ -74,48 +80,51 @@ class AuthTestsSQL3(unittest.TestCase):
 
     def test_check_decorator_logged_in(self):
 
-        self.Guard.login('admin', 'password')
+        Auth.login('admin', 'password')
 
-        @self.Guard.require_login
+        @Auth.require_login
         def test_this():
             return "i am logged in"
 
         self.assertTrue("i am logged in" == test_this())
 
+
 class AuthTestsMONGO(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls._client = MongoClient('localhost')
+
+        auth.config.G_DATABASE_POINTER = cls._client['Guardian_test_db']
+        auth.config.G_MODEL = 'pymongo'
+        auth.config.G_SESSION = 'dict'
+
+        Auth.set_settings()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._client.close()
     
     def setUp(self):
-        _client = MongoClient('localhost')
-        database = _client['Guardian_test_db']
-
-        ### Hacky solution but this is for the test only, while it might not be beautiful pythonic code
-        ### atleast it actually works ;)
-        from auth.models.mongoAdapter import UserModel
-        setattr(auth, 'UserModel', UserModel)
-
-        ### clean up of the database for each run
-        database.user.drop()
-
-        auth.config.G_DATABASE_POINTER = database
-        self.Guard = auth.Guardian()
-
-        self.Guard.create(username = 'admin', password = 'password')
+        Auth.logout()
+        auth.config.G_DATABASE_POINTER.user.drop()
+        Auth.create(username = 'admin', password = 'password')
 
     def test_authenticate_pass(self):
 
-        self.assertTrue(self.Guard.authenticate(username = "admin", password = "password"))
+        self.assertTrue(Auth.authenticate(username = "admin", password = "password"))
 
     def test_authenticate_fail(self):
 
         try:
-            self.Guard.authenticate(username = "admin", password = "password2")
+            Auth.authenticate(username = "admin", password = "password2")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'Username or password incorrect')
 
     def test_authenticate_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "")
+            Auth.authenticate(username = "", password = "")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'password is required')
 
@@ -123,7 +132,7 @@ class AuthTestsMONGO(unittest.TestCase):
     def test_authenticate_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "password")
+            Auth.authenticate(username = "", password = "password")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
@@ -131,23 +140,23 @@ class AuthTestsMONGO(unittest.TestCase):
     def test_creaste_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "password")
+            Auth.authenticate(username = "", password = "password")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
     def test_empty_auth(self):
 
-        self.assertFalse(self.Guard.user())
+        self.assertFalse(Auth.user())
 
     def test_auth_user(self):
 
-        self.Guard.authenticate(username = "admin", password = "password")
-        self.assertTrue(self.Guard.user().username == 'admin')
+        Auth.authenticate(username = "admin", password = "password")
+        self.assertTrue(Auth.user().username == 'admin')
 
 
     def test_check_decorator_not_logged_in(self):
 
-        @self.Guard.require_login
+        @Auth.require_login
         def test_this():
             return "i am logged in"
 
@@ -156,9 +165,9 @@ class AuthTestsMONGO(unittest.TestCase):
 
     def test_check_decorator_logged_in(self):
 
-        self.Guard.login('admin', 'password')
+        Auth.login('admin', 'password')
 
-        @self.Guard.require_login
+        @Auth.require_login
         def test_this():
             return "i am logged in"
 
@@ -166,30 +175,37 @@ class AuthTestsMONGO(unittest.TestCase):
 
 class AuthTestsSQLalchemy(unittest.TestCase):
     
-    def setUp(self):
-        ### Hacky solution but this is for the test only, while it might not be beautiful pythonic code
-        ### atleast it actually works ;)
-        from auth.models.alchemyAdapter import UserModel
-        setattr(auth, 'UserModel', UserModel)
+    @classmethod
+    def setUpClass(cls):
 
-        auth.config.G_DATABASE_POINTER = engine
-        self.Guard = auth.Guardian()
+        auth.config.G_DATABASE_POINTER = create_engine('sqlite:///test.db', echo=False)
+        auth.config.G_MODEL = 'sqlAlchemy'
+        auth.config.G_SESSION = 'dict'
+
+        Auth.set_settings()
+
+    @classmethod
+    def tearDownClass(cls):
+        auth.config.G_DATABASE_POINTER.dispose()
+    
+    def setUp(self):
+        Auth.logout()
 
     def test_authenticate_pass(self):
 
-        self.assertTrue(self.Guard.authenticate(username = "admin", password = "password"))
+        self.assertTrue(Auth.authenticate(username = "admin", password = "password"))
 
     def test_authenticate_fail(self):
 
         try:
-            self.Guard.authenticate(username = "admin", password = "password2")
+            Auth.authenticate(username = "admin", password = "password2")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'Username or password incorrect')
 
     def test_authenticate_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "")
+            Auth.authenticate(username = "", password = "")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'password is required')
 
@@ -197,7 +213,7 @@ class AuthTestsSQLalchemy(unittest.TestCase):
     def test_authenticate_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "password")
+            Auth.authenticate(username = "", password = "password")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
@@ -205,22 +221,22 @@ class AuthTestsSQLalchemy(unittest.TestCase):
     def test_creaste_validation_fail(self):
 
         try:
-            self.Guard.authenticate(username = "", password = "password")
+            Auth.authenticate(username = "", password = "password")
         except auth.AuthException as e:
             self.assertRaisesRegexp(e, 'username is required')
 
     def test_empty_auth(self):
 
-        self.assertFalse(self.Guard.user())
+        self.assertFalse(Auth.user())
 
     def test_auth_user(self):
 
-        self.Guard.authenticate(username = "admin", password = "password")
-        self.assertTrue(self.Guard.user().username == 'admin')
+        Auth.authenticate(username = "admin", password = "password")
+        self.assertTrue(Auth.user().username == 'admin')
 
     def test_check_decorator_not_logged_in(self):
 
-        @self.Guard.require_login
+        @Auth.require_login
         def test_this():
             return "i am logged in"
 
@@ -229,9 +245,9 @@ class AuthTestsSQLalchemy(unittest.TestCase):
 
     def test_check_decorator_logged_in(self):
 
-        self.Guard.login('admin', 'password')
+        Auth.login('admin', 'password')
 
-        @self.Guard.require_login
+        @Auth.require_login
         def test_this():
             return "i am logged in"
 

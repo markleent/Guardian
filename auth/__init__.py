@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-import importlib
 import auth.hasher as hash
 from .authexception import AuthException
 from .redirector import Redirect
 import auth.config
 from functools import wraps
-
-### Importing UserModel from config
-UserModel = importlib.import_module(config.G_MODEL).UserModel
-### Importing Session from config
-if config.USE_SESSION:
-    Session = importlib.import_module(config.G_SESSION).Session
+from auth.models.modelManager import mManager
+from auth.session.sessionManager import sManager
 
 import simplevalidator
+
+sessionMngr = sManager()
+modelMngr = mManager()
+
+
 
 __version__ = "0.0.3"
 
@@ -20,13 +20,21 @@ class Guardian(object):
     def __init__(self):
         self.db = None
         self.auth_user = None
-        self.set_settings()
+
+        ### init settings if there is a database connection instance
+        if config.G_DATABASE_POINTER:
+            self.set_settings()
 
     def set_settings(self, db = None):
         self.db = db if db else config.G_DATABASE_POINTER
-        self.UserModel = UserModel(db = self.db)
-        if config.USE_SESSION:
-            self.session = Session()
+        self.set_model(config.G_MODEL)
+        self.set_session(config.G_SESSION)
+
+    def set_model(self, model = None):
+        self.UserModel = modelMngr.set_model(model)(db = self.db)
+
+    def set_session(self, session = None):
+        self.session = sessionMngr.set_session(session)()
 
     def __user_exists(self, username):
         return self.UserModel.find_by_username(username)
@@ -77,10 +85,10 @@ class Guardian(object):
         return self.UserModel.create(username = username, password = encPass, role = role)
 
     def check(self):
-        return self.session.haskey('user_id') and isinstance(self.auth_user, UserModel)
+        return self.session.haskey('user_id') and isinstance(self.auth_user, modelMngr.model)
 
     def user(self):
-        return self.auth_user if isinstance(self.auth_user, UserModel) else {}
+        return self.auth_user if isinstance(self.auth_user, modelMngr.model) else {}
 
     ### we don't need to check here for a "false" case, as the authenticate method already take care of that
     def login(self, username, password):
@@ -91,7 +99,7 @@ class Guardian(object):
 
     def login_user(self, user):
         
-        if not isinstance(user, UserModel):
+        if not isinstance(user, modelMngr.model):
             raise TypeError('user is not an instance of UserModel')
 
         self.auth_user = user
