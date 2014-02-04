@@ -63,6 +63,25 @@ class AuthTestsSQL3(unittest.TestCase):
         self.Guard.authenticate(username = "admin", password = "password")
         self.assertTrue(self.Guard.user().username == 'admin')
 
+    def test_check_decorator_not_logged_in(self):
+
+        @self.Guard.require_login
+        def test_this():
+            return "i am logged in"
+
+        self.assertTrue("You are being redirected !!" == test_this())
+
+
+    def test_check_decorator_logged_in(self):
+
+        self.Guard.login('admin', 'password')
+
+        @self.Guard.require_login
+        def test_this():
+            return "i am logged in"
+
+        self.assertTrue("i am logged in" == test_this())
+
 class AuthTestsMONGO(unittest.TestCase):
     
     def setUp(self):
@@ -125,6 +144,26 @@ class AuthTestsMONGO(unittest.TestCase):
         self.Guard.authenticate(username = "admin", password = "password")
         self.assertTrue(self.Guard.user().username == 'admin')
 
+
+    def test_check_decorator_not_logged_in(self):
+
+        @self.Guard.require_login
+        def test_this():
+            return "i am logged in"
+
+        self.assertTrue("You are being redirected !!" == test_this())
+
+
+    def test_check_decorator_logged_in(self):
+
+        self.Guard.login('admin', 'password')
+
+        @self.Guard.require_login
+        def test_this():
+            return "i am logged in"
+
+        self.assertTrue("i am logged in" == test_this())
+
 class AuthTestsSQLalchemy(unittest.TestCase):
     
     def setUp(self):
@@ -178,6 +217,25 @@ class AuthTestsSQLalchemy(unittest.TestCase):
 
         self.Guard.authenticate(username = "admin", password = "password")
         self.assertTrue(self.Guard.user().username == 'admin')
+
+    def test_check_decorator_not_logged_in(self):
+
+        @self.Guard.require_login
+        def test_this():
+            return "i am logged in"
+
+        self.assertTrue("You are being redirected !!" == test_this())
+
+
+    def test_check_decorator_logged_in(self):
+
+        self.Guard.login('admin', 'password')
+
+        @self.Guard.require_login
+        def test_this():
+            return "i am logged in"
+
+        self.assertTrue("i am logged in" == test_this())
 
 
 if __name__ == '__main__':

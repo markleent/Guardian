@@ -2,13 +2,15 @@
 import importlib
 import auth.hasher as hash
 from .authexception import AuthException
+from .redirector import Redirect
 import auth.config
+from functools import wraps
 
 ### Importing UserModel from config
 UserModel = importlib.import_module(config.G_MODEL).UserModel
 ### Importing Session from config
 if config.USE_SESSION:
-    Session = importlib.import_module(G_SESSION).Session
+    Session = importlib.import_module(config.G_SESSION).Session
 
 import simplevalidator
 
@@ -47,7 +49,7 @@ class Guardian(object):
         if user is not None:
             if hash.check(password, user.password):
                 self.auth_user = user
-                return True, [user.username, user.role]           
+                return True         
 
         raise AuthException('Username or password incorrect') 
 
@@ -75,29 +77,38 @@ class Guardian(object):
         return self.UserModel.create(username = username, password = encPass, role = role)
 
     def check(self):
-        return self.user is not None
+        return self.session.haskey('user_id') and isinstance(self.auth_user, UserModel)
 
     def user(self):
-        return self.auth_user if self.auth_user else {}
+        return self.auth_user if isinstance(self.auth_user, UserModel) else {}
 
-    """ Wrapper methods because i am making a lib like i am going to reuse it :D """    
-    def register(self, username, password, role):
-        self.create(username = username, password = password, role = role)
+    ### we don't need to check here for a "false" case, as the authenticate method already take care of that
+    def login(self, username, password):
+        if (self.authenticate(username = username, password = password)):
+            self.session.set('user_id', self.auth_user.id)
 
-    def login(self, user):
+        return True
+
+    def login_user(self, user):
         
         if not isinstance(user, UserModel):
             raise TypeError('user is not an instance of UserModel')
 
         self.auth_user = user
-        #userData  = self.authenticate(username = username, password = password)[1]
-        #self.session.set('username', userData[0])
-        #self.session.set('role', userData[1])
+        self.session.set('user_id', user.id)
+
+        return True
 
     def logout(self):
         self.auth_user = None
-        #self.session.unset('username')
-        #self.session.unset('role')
+        self.session.unset('user_id')
 
-    #def check(self):
-    #    return self.session.haskey('username')
+
+    def require_login(self, f):
+        @wraps(f)
+        def is_authenticated(*args, **kwargs):
+            if not self.check():
+                return Redirect()
+            return f(*args, **kwargs)
+
+        return is_authenticated
