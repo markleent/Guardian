@@ -16,6 +16,10 @@ Auth = auth.Guardian()
 ### Models Tests
 class AuthModelsDefaults:
 
+    def test_Guaradian_init(self):
+
+        self.assertTrue(auth.Guardian())
+
     def test_authenticate_pass(self):
 
         self.assertTrue(Auth.authenticate(username = "admin", password = "password"))
