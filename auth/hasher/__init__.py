@@ -14,7 +14,7 @@ def make(word):
     salt = ("$2a$06$" + hashlib.sha512(prep_salt).hexdigest()[0:22] + "$").encode('utf-8')
 
     output = bcrypt.hashpw(enc_word, salt)
-
+    
     if isinstance(output, str):
         return output
     else:

@@ -14,7 +14,7 @@ modelMngr = mManager()
 
 
 
-__version__ = "0.0.4"
+__version__ = "0.0.4.3"
 
 class Guardian(object):
     def __init__(self):
