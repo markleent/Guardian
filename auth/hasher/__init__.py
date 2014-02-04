@@ -15,10 +15,7 @@ def make(word):
 
     output = bcrypt.hashpw(enc_word, salt)
     
-    if isinstance(output, str):
-        return output
-    else:
-        return output.decode(encoding='utf-8')
+    return output.decode('utf-8')
 
 def check(word, hash):
     return bcrypt.hashpw(word.encode('utf-8'), hash.encode('utf-8')).decode('utf-8') == hash
