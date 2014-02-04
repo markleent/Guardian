@@ -24,7 +24,19 @@ This library is to be init at your apps init, with the correct adapter for the u
 
 Or, in the case of a non web specific application, just asis !
 
-(to be continued)
+### Requirements ###
+
+Dependecies:
+- bcrypt
+- simpleValidator
+
+Optional:
+- Flask, to handle session/basic http auth through Flask
+- Tornado, same as above !
+- sqlAlchemy, if you need to use sqlAlchemy !
+- PyMongo (and a MongoDB server running)
+
+
 
 Unit tested ?
 =============
