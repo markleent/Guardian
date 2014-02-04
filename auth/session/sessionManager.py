@@ -1,8 +1,13 @@
 import sys
 import auth.config
-import auth.session.dictAdapter as dictAdapter
-import auth.session.flaskAdapter as fkaskAdapter
-#import auth.session.tornadoAdapter as tornadoAdapter
+
+### We don't want unecessary import here :)
+if auth.config.G_SESSION == 'dict':
+    import auth.session.dictAdapter as dictAdapter
+elif  auth.config.G_SESSION == 'Flask':
+    import auth.session.flaskAdapter as fkaskAdapter
+elif  auth.config.G_SESSION == 'tornado':
+    import auth.session.tornadoAdapter as tornadoAdapter
 
 ADAPTERS = {
     'dict': 'dictAdapter',

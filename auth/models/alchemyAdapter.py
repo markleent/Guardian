@@ -37,18 +37,26 @@ class UserModel:
         
         if self.id is None:
             new_user = User(username = self.username, password = self.password, role = self.role)
-            self.session.add(new_user).commit()
+            self.session.add(new_user)
+            self.session.commit()
             self.set('id', new_user.id)
         else:
-
             ### we keep the state of the user inside the class instance, and refresh data on the fly through sqlAlchemy
             user = self.session.query(User).filter_by(id=self.id).first()
             user.username = self.username
             user.password = self.password
             user.role = self.role
-            self.session.add(user).commit()
+            self.session.add(user)
+            self.session.commit()
 
         return self
+
+    def delete(self):
+        user = self.session.query(User).filter_by(id=self.id).first()
+        self.session.delete(user)
+        self.session.commit()
+        self.__reset()
+        return True
 
     def create(self, **kwargs):
         self.id = None
@@ -56,7 +64,6 @@ class UserModel:
         self.password = kwargs.get('password', None)
         self.role = kwargs.get('role', None)
         return self.save()
-
 
     def find(self, id):
         user = self.session.query(User).filter_by(id=id).first()
@@ -79,7 +86,7 @@ class UserModel:
         self.username = None
         self.password = None
         self.role = None
-        
+
     def __populate(self, data):
         self.id = data.id
         self.username = data.username

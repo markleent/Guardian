@@ -1,7 +1,6 @@
 ### Tells Guardian what kind of framework you are using, supported fw are Flask and Tornado
 FRAMEWORK = ''
 
-
 ### Used only with Flask/or Tornado frameworks
 SESSION_SECRET = ''
 

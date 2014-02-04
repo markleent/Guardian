@@ -22,7 +22,7 @@ class UserModel:
             self.db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?);', [self.username, self.password, self.role])
             self.set('id', self.db.cursor().lastrowid)
         else:
-            self.db.execute('UPDATE users set username = ?, password = ?, role = ? where id = ?', [self.username, self.password, self.role, self.id])
+            self.db.execute('UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?', [self.username, self.password, self.role, self.id])
 
         self.db.commit()
 
@@ -35,9 +35,14 @@ class UserModel:
         self.role = kwargs.get('role', None)
         return self.save()
 
+    def delete(self):
+        self.db.execute('DELETE FROM users WHERE id = ?', [self.id])
+        self.db.commit()
+        self.__reset()
+        return True
 
     def find(self, id):
-        user = self.db.execute('SELECT * from users WHERE id = ?;', [id]).fetchone()
+        user = self.db.execute('SELECT * FROM users WHERE id = ?;', [id]).fetchone()
         if user:
             self.__populate(user)
             return self
@@ -45,7 +50,7 @@ class UserModel:
         return None 
 
     def find_by_username(self, username):
-        user = self.db.execute('SELECT * from users WHERE username = ?;', [username]).fetchone()
+        user = self.db.execute('SELECT * FROM users WHERE username = ?;', [username]).fetchone()
         if user:
             self.__populate(user)
             return self

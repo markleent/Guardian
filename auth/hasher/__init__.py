@@ -2,6 +2,7 @@
 
 import hashlib
 import bcrypt
+import uuid
 
 """ 
     force hash module to always output utf8 strings instead of bytes
@@ -9,7 +10,8 @@ import bcrypt
 """
 def make(word):
     enc_word = word.encode('utf-8')
-    salt = ("$2a$06$" + hashlib.sha512(enc_word).hexdigest()[0:22] + "$").encode('utf-8')
+    prep_salt = uuid.uuid4().hex.encode('utf-8')
+    salt = ("$2a$06$" + hashlib.sha512(prep_salt).hexdigest()[0:22] + "$").encode('utf-8')
 
     output = bcrypt.hashpw(enc_word, salt)
 

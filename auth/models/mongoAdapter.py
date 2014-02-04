@@ -35,11 +35,6 @@ class UserModel:
 
         return self
 
-    def delete(self):
-        self.users.delete({'usernae': self.username})
-        self.__reset()
-
-
     def create(self, **kwargs):
         self.id = None
         self.username = kwargs.get('username', None)
@@ -47,6 +42,10 @@ class UserModel:
         self.role = kwargs.get('role', None)
         return self.save()
 
+    def delete(self):
+        self.users.remove({'username': self.username})
+        self.__reset()
+        return True
 
     def find(self, id):
         user = self.users.find_one({"_id": id})
