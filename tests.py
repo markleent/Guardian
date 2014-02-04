@@ -173,7 +173,7 @@ class AuthModelsDefaults:
         ### Load user
         user = self.mManager.find_by_username('admin')
 
-        Auth.login_user(user)
+        self.assertTrue(Auth.login_user(user))
 
         ### check that we are indeed logged as admin
         self.assertTrue(Auth.check())
