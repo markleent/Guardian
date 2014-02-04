@@ -9,6 +9,8 @@ import sys
 import flaskapp
 from mock import Mock
 
+from auth.models.modelManager import mManager
+
 Auth = auth.Guardian()
 
 ### Models Tests
@@ -116,6 +118,46 @@ class AuthModelsDefaults:
         self.assertTrue(Auth.user().get('car') == 32)
 
 
+    def test_manager_find_by_id(self):
+
+        ### Ids are automatic, so we have to use a small trick, here ;)
+        user = self.mManager.find_by_username('admin')
+
+        user_id = user.id
+
+        user = None
+
+        user = self.mManager.find(user_id)
+
+        self.assertTrue(user.username == 'admin')
+
+    ### modify role
+    def test_manager_save_role(self):
+
+        user = self.mManager.find_by_username('admin')
+
+        ### change user role from admin to simple user
+        user.role = 0
+
+        self.assertTrue(user.save())
+
+    ### verify role in subsequent call
+    def test_manager_save_state(self):
+
+        user = self.mManager.find_by_username('admin')
+
+        self.assertTrue(user.role == 0)
+
+    ### reverse role
+    def test_manager_save_state_reverse(self):
+
+        Auth.login('admin', 'password')
+
+        Auth.user().role = 1
+
+        self.assertTrue(Auth.user().save())
+
+
 class AuthTestsSQL3(unittest.TestCase, AuthModelsDefaults):
 
     @classmethod
@@ -125,6 +167,9 @@ class AuthTestsSQL3(unittest.TestCase, AuthModelsDefaults):
         auth.config.G_SESSION = 'dict'
 
         Auth.set_settings()
+
+        ### manual call on the manager, it looks... dangerous ... :)
+        cls.mManager = mManager().set_model('sqlite3')(db = auth.config.G_DATABASE_POINTER)
 
     @classmethod
     def tearDownClass(cls):
@@ -147,6 +192,9 @@ class AuthTestsMONGO(unittest.TestCase, AuthModelsDefaults):
 
         Auth.set_settings()
 
+        ### manual call on the manager, it looks... dangerous ... :)
+        cls.mManager = mManager().set_model('pymongo')(db = auth.config.G_DATABASE_POINTER)
+
     @classmethod
     def tearDownClass(cls):
         cls._client.close()
@@ -167,6 +215,9 @@ class AuthTestsSQLalchemy(unittest.TestCase, AuthModelsDefaults):
         auth.config.G_SESSION = 'dict'
 
         Auth.set_settings()
+
+        ### manual call on the manager, it looks... dangerous ... :)
+        cls.mManager = mManager().set_model('sqlAlchemy')(db = auth.config.G_DATABASE_POINTER)
 
     @classmethod
     def tearDownClass(cls):

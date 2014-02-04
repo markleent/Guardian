@@ -33,7 +33,7 @@ class UserModel:
                 }}
             )
 
-        return self
+        return True
 
     def create(self, **kwargs):
         self.id = None

@@ -26,7 +26,7 @@ class UserModel:
 
         self.db.commit()
 
-        return self
+        return True
 
     def create(self, **kwargs):
         self.id = None

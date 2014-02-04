@@ -14,10 +14,8 @@ current_module = thismodule = sys.modules[__name__]
 
 class mManager(object):
 
-    def __init__(self, adapter = None):
-
-        if adapter:
-            self.set_model(adapter)
+    def __init__(self):
+        pass
 
     def set_model(self, adapter = None):
         model_adapter = adapter if adapter else auth.config.G_MODEL

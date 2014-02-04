@@ -49,7 +49,7 @@ class UserModel:
             self.session.add(user)
             self.session.commit()
 
-        return self
+        return True
 
     def delete(self):
         user = self.session.query(User).filter_by(id=self.id).first()
