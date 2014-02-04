@@ -118,7 +118,7 @@ class AuthModelsDefaults:
         self.assertTrue(Auth.user().get('car') == 32)
 
 
-    def test_manager_find_by_id(self):
+    def test_manager_find_by_id_pass(self):
 
         ### Ids are automatic, so we have to use a small trick, here ;)
         user = self.mManager.find_by_username('admin')
@@ -130,6 +130,13 @@ class AuthModelsDefaults:
         user = self.mManager.find(user_id)
 
         self.assertTrue(user.username == 'admin')
+
+
+    def test_manager_find_by_id_fail(self):
+
+        user = self.mManager.find(-2)
+
+        self.assertFalse(user)
 
     ### modify role
     def test_manager_save_role(self):
@@ -156,6 +163,43 @@ class AuthModelsDefaults:
         Auth.user().role = 1
 
         self.assertTrue(Auth.user().save())
+
+    ### Load a user through the manager, and then log him back !
+    def test_manager_log_user_programatically_pass(self):
+
+        ### We make sure that no user is currently Authenticated
+        self.assertFalse(Auth.user())
+
+        ### Load user
+        user = self.mManager.find_by_username('admin')
+
+        Auth.login_user(user)
+
+        ### check that we are indeed logged as admin
+        self.assertTrue(Auth.check())
+        self.assertTrue(Auth.user().username == "admin")
+
+    def test_manager_log_user_programatically_pass(self):
+
+        ### We make sure that no user is currently Authenticated
+        self.assertFalse(Auth.user())
+
+        ### Load user
+        user = "I am a fake user, lol ?"
+
+        ### we can't be logged in baby ! - note i am writing this test at.... 3am or so, pardon my French :P
+        try:
+            Auth.login_user(user)
+        except TypeError as e:
+            self.assertRaisesRegexp(e, 'user is not an instance of UserModel')
+
+    def test_some_dictSession_that_coverall_doesnt_seem_to_cover(self):
+
+        try:
+            Auth.session.get('whoopsydoo')
+        except AttributeError as e:
+            self.assertRaisesRegexp(e, 'Attribute is not a valid Session key')
+
 
 
 class AuthTestsSQL3(unittest.TestCase, AuthModelsDefaults):
@@ -233,14 +277,14 @@ class AuthTestsSQLalchemy(unittest.TestCase, AuthModelsDefaults):
 ### But to be able to test the suite without having to duplicate code, it is needed
 mock_context = Mock()
 mock_context.__enter__ = Mock(return_value='I am in')
-mock_context.__exit__ = Mock(return_value=False)
+mock_context.__exit__ = Mock(return_value=True)
 
 class AuthSessionDefaults:
 
     def test_session_empty(self):
         with self.app:
             try:
-                Auth.session.get('user_id')
+                Auth.session.get('user_id_2342')
             except AttributeError as e:
                 self.assertRaisesRegexp(e, 'Attribute is not a valid Session key')
 
