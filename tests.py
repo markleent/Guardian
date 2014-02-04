@@ -195,16 +195,19 @@ class AuthSessionDefaults:
 
     def test_session_pass(self):
         with self.app:
-            Auth.login('admin', 'password')
+            try:
+                print(self.app.name)
+            except Exception:
+                pass
+                
 
+            Auth.login('admin', 'password')
             self.assertTrue(Auth.session.get('user_id'))
 
     def test_session_set(self):
         with self.app:
             Auth.login('admin', 'password')
-
             Auth.session.set('test', True)
-
             self.assertTrue(Auth.session.get('test'))
 
 
@@ -235,7 +238,6 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
         auth.config.G_DATABASE_POINTER = connect_db('test.db')
         auth.config.G_MODEL = 'sqlite3'
         auth.config.G_SESSION = 'Flask'
-
         Auth.set_settings()
 
     @classmethod
@@ -244,7 +246,6 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
 
     def setUp(self):
         self.app = flaskapp.app.test_request_context('/test')
-
         with self.app:
             Auth.logout()
 

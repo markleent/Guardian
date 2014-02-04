@@ -10,21 +10,18 @@ try:
 except ImportError:
     if auth.config.DEBUG:
         logging.warning('Import Error: %s', 'Null Session (dictAdapter) could not be imported, please check if you need this')
-    pass
 
 try:
     import auth.session.flaskAdapter as flaskAdapter
 except ImportError:
     if config.DEBUG:
         logging.warning('Import Error: %s', 'flask Session (flaskAdapter) could not be imported, please check if you need this')
-    pass
 
 try:
     import auth.session.tornadoAdapter as tornadoAdapter
 except ImportError:
     if auth.auth.config.DEBUG:
         logging.warning('Import Error: %s', 'tornado Session (tornadoAdapter) could not be imported, please check if you need this')
-    pass
 
 
 ADAPTERS = {
