@@ -169,7 +169,7 @@ class AuthModelsDefaults:
         self.assertTrue(Auth.user().save())
 
     ### Load a user through the manager, and then log him back !
-    def test_manager_log_user_programatically_pass(self):
+    def test_manager_log_user_programatically_pass_1(self):
 
         ### We make sure that no user is currently Authenticated
         self.assertFalse(Auth.user())
@@ -177,16 +177,52 @@ class AuthModelsDefaults:
         ### Load user
         user = self.mManager.find_by_username('admin')
 
+        user_id = user.id
 
         self.assertTrue(Auth.login_user(user) == True)
 
-        ### these assertion, are frankly redondant, no code smell here, i am just trying
-        ### to improve code coverage (for some reasons, Coverall do not count them)
-        self.assertTrue(Auth.auth_user)
+    def test_manager_log_user_programatically_pass_2(self):
 
-        self.assertTrue(Auth.session.get('user_id'))
+        ### We make sure that no user is currently Authenticated
+        self.assertFalse(Auth.user())
 
-        ### check that we are indeed logged as admin
+        ### Load user
+        user = self.mManager.find_by_username('admin')
+
+        user_id = user.id
+
+        Auth.login_user(user)
+
+        self.assertTrue(Auth.auth_user.id == user_id)
+
+
+    def test_manager_log_user_programatically_pass_3(self):
+
+        ### We make sure that no user is currently Authenticated
+        self.assertFalse(Auth.user())
+
+        ### Load user
+        user = self.mManager.find_by_username('admin')
+
+        user_id = user.id
+
+        Auth.login_user(user)
+
+        self.assertTrue(Auth.session.get('user_id') == user_id)
+
+
+    def test_manager_log_user_programatically_pass_4(self):
+
+        ### We make sure that no user is currently Authenticated
+        self.assertFalse(Auth.user())
+
+        ### Load user
+        user = self.mManager.find_by_username('admin')
+
+        user_id = user.id
+
+        Auth.login_user(user)
+
         self.assertTrue(Auth.check())
         self.assertTrue(Auth.user().username == "admin")
 
