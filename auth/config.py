@@ -7,8 +7,8 @@ SESSION_SECRET = 'this is my secret key'
 ### Here must be set the active connection to the database
 G_DATABASE_POINTER = None
 
-### default redirect route
-REDIRECT_ROUTE = '/login'
+### default redirect route/URL
+REDIRECT_URI = 'login'
 
 ### Default dbAdapter, list is sqlite3, sqlAlchemy, pymongo
 G_MODEL = 'sqlite3'

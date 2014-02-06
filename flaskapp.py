@@ -1,4 +1,4 @@
-from flask import Flask, json, request, g, redirect, url_for, abort, render_template, flash
+from flask import (Flask, json, request, g, redirect, url_for, abort, render_template, flash, Response)
 import auth.config
 
 app = Flask(__name__)
@@ -9,6 +9,9 @@ app.secret_key = auth.config.SESSION_SECRET
 def test():
     return 'Hello (test) World !'
 
+@app.route('/login')
+def login():
+    return 'You have been redirected to login'
 
 if __name__ == "__main__":
     app.run()

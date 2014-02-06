@@ -14,13 +14,12 @@ ADAPTERS = {
 current_module = thismodule = sys.modules[__name__]
 
 class sManager(object):
+    adapter = None
 
-    def __init__(self):
-        pass
-
-    def set_session(self, adapter = None):
+    @staticmethod
+    def set_session(adapter = None):
         sess_adapter = adapter if adapter else config.G_SESSION
-        self.adapter = getattr(current_module, ADAPTERS[sess_adapter]).Session
+        sManager.adapter = getattr(current_module, ADAPTERS[sess_adapter]).Session
 
-        return self.adapter
+        return sManager.adapter
 

@@ -13,13 +13,12 @@ ADAPTERS = {
 current_module = thismodule = sys.modules[__name__]
 
 class mManager(object):
+    model = None
 
-    def __init__(self):
-        pass
-
-    def set_model(self, adapter = None):
+    @staticmethod
+    def set_model(adapter = None):
         model_adapter = adapter if adapter else config.G_MODEL
-        self.model = getattr(current_module, ADAPTERS[model_adapter]).UserModel
+        mManager.model = getattr(current_module, ADAPTERS[model_adapter]).UserModel
 
-        return self.model
+        return mManager.model
 

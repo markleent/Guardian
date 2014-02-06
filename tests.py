@@ -62,28 +62,6 @@ class AuthModelsDefaults:
         Auth.authenticate(username = "admin", password = "password")
         self.assertTrue(Auth.user().username == 'admin')
 
-    ### Note the following method are just to test that the decorator is fired
-    ### It is not the final test !
-    def test_check_decorator_not_logged_in(self):
-
-        @Auth.require_login
-        def test_this():
-            return "i am logged in"
-
-        self.assertTrue("You are being redirected !!" == test_this())
-
-    ### Note the following method are just to test that the decorator is fired
-    ### It is not the final test !
-    def test_check_decorator_logged_in(self):
-
-        Auth.login('admin', 'password')
-
-        @Auth.require_login
-        def test_this():
-            return "i am logged in"
-
-        self.assertTrue("i am logged in" == test_this())
-
     def test_create_user_username_fail(self):
 
         try:
@@ -260,7 +238,7 @@ class AuthTestsSQL3(unittest.TestCase, AuthModelsDefaults):
         Auth.set_settings()
 
         ### manual call on the manager, it looks... dangerous ... :)
-        cls.mManager = mManager().set_model('sqlite3')(db = auth.config.G_DATABASE_POINTER)
+        cls.mManager = mManager.set_model('sqlite3')(db = auth.config.G_DATABASE_POINTER)
 
     @classmethod
     def tearDownClass(cls):
@@ -284,7 +262,7 @@ class AuthTestsMONGO(unittest.TestCase, AuthModelsDefaults):
         Auth.set_settings()
 
         ### manual call on the manager, it looks... dangerous ... :)
-        cls.mManager = mManager().set_model('pymongo')(db = auth.config.G_DATABASE_POINTER)
+        cls.mManager = mManager.set_model('pymongo')(db = auth.config.G_DATABASE_POINTER)
 
     @classmethod
     def tearDownClass(cls):
@@ -308,7 +286,7 @@ class AuthTestsSQLalchemy(unittest.TestCase, AuthModelsDefaults):
         Auth.set_settings()
 
         ### manual call on the manager, it looks... dangerous ... :)
-        cls.mManager = mManager().set_model('sqlAlchemy')(db = auth.config.G_DATABASE_POINTER)
+        cls.mManager = mManager.set_model('sqlAlchemy')(db = auth.config.G_DATABASE_POINTER)
 
     @classmethod
     def tearDownClass(cls):
@@ -347,6 +325,19 @@ class AuthSessionDefaults:
             self.assertTrue(Auth.session.get('test'))
 
 
+    def test_check_decorator_logged_in(self):
+
+        with self.app:
+            Auth.login('admin', 'password')
+
+            @Auth.require_login
+            def test_this():
+                return "i am logged in"
+
+            self.assertTrue("i am logged in" == test_this())
+
+
+
 class AuthTestsSQL3_DICT(unittest.TestCase, AuthSessionDefaults):
 
     @classmethod
@@ -366,6 +357,15 @@ class AuthTestsSQL3_DICT(unittest.TestCase, AuthSessionDefaults):
         self.app = mock_context
         Auth.logout()
 
+    ### Null Redirector test
+    def test_check_decorator_not_logged_in(self):
+        
+        with self.app:
+            @Auth.require_login
+            def test_this():
+                return "i am logged in"
+
+            self.assertTrue("You have been redirected to login" == test_this())
 
 
 class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
@@ -388,8 +388,19 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
         with self.app:
             Auth.logout()
 
+    ### Flask Specific redirector
+    def test_check_decorator_not_logged_in(self):
+        
+        with self.app:
+            @flaskapp.app.route('/test')
+            @Auth.require_login
+            def test_this():
+                return "i am logged in"
 
-
+            resp = flaskapp.Response(test_this())
+            resp = flaskapp.app.process_response(resp)
+            print(resp.headers)
+            self.assertTrue(302 == test_this().status_code)
 
 """
 ###Not yet implemented !

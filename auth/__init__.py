@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 from . import hasher as hash
 from .authexception import AuthException
-from .redirector import Redirect
 from . import config
 from functools import wraps
 from .models.modelManager import mManager
 from .session.sessionManager import sManager
+from .redirectors.redirectorManager import rManager
 
 import simplevalidator
 
-sessionMngr = sManager()
-modelMngr = mManager()
+sessionMngr = sManager
+modelMngr = mManager
+redirMngr = rManager
 
 
 
@@ -128,10 +129,14 @@ class Guardian(object):
         self.session.unset('user_id')
 
     def require_login(self, f):
+        
+        def get_redirector():
+            return redirMngr.set_redirector()
+
         @wraps(f)
         def is_authenticated(*args, **kwargs):
             if not self.check():
-                return Redirect()
+                return get_redirector()()
             return f(*args, **kwargs)
 
         return is_authenticated
