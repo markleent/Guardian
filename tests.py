@@ -380,6 +380,7 @@ class AuthTestsSQL3_DICT(unittest.TestCase, AuthSessionDefaults):
 
     @classmethod
     def tearDownClass(cls):
+        auth.config.REDIRECT_URI = "login"
         auth.config.G_DATABASE_POINTER.close()
         Auth.logout()
 
@@ -397,6 +398,17 @@ class AuthTestsSQL3_DICT(unittest.TestCase, AuthSessionDefaults):
 
             self.assertTrue("You have been redirected to login" == test_this())
 
+    ### redirect to google
+    def test_check_decorator_redirect_google(self):
+        auth.config.REDIRECT_URI = "http://google.com"
+
+        with self.app:
+            @Auth.require_login
+            def test_this():
+                return "i am logged in"
+
+            self.assertTrue("You have been redirected to http://google.com" == test_this())
+
 
 class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
 
@@ -411,6 +423,7 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
 
     @classmethod
     def tearDownClass(cls):
+        auth.config.REDIRECT_URI = "login"
         auth.config.G_DATABASE_POINTER.close()
         with cls.app:
             Auth.logout()
@@ -429,6 +442,17 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
 
             #resp = flaskapp.Response(test_this())
             #resp = flaskapp.app.process_response(resp)
+            self.assertTrue(302 == test_this().status_code)
+
+        ### redirect to google
+    def test_check_decorator_redirect_google(self):
+        auth.config.REDIRECT_URI = "http://google.com"
+
+        with self.app:
+            @Auth.require_login
+            def test_this():
+                return "i am logged in"
+
             self.assertTrue(302 == test_this().status_code)
 
 """
