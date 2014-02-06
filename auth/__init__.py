@@ -17,13 +17,16 @@ modelMngr = mManager()
 __version__ = "0.0.4.3"
 
 class Guardian(object):
-    def __init__(self):
+    def __init__(self, app_context=None):
         self.db = None
         self.auth_user = None
 
         ### init settings if there is a database connection instance
         if config.G_DATABASE_POINTER:
             self.set_settings()
+
+        if app_context:
+            self.app = app_context
 
     def set_settings(self, db = None):
         self.db = db if db else config.G_DATABASE_POINTER
@@ -43,6 +46,9 @@ class Guardian(object):
                 self.login_user(self.__get_user_by_id(self.session.get('user_id')))
         except AttributeError:
             pass
+
+    def unset_user(self):
+        self.auth_user = None
 
     def __user_exists(self, username):
         return self.UserModel.find_by_username(username)
@@ -121,14 +127,12 @@ class Guardian(object):
         self.auth_user = None
         self.session.unset('user_id')
 
-    def unset_user(self):
-        self.auth_user = None
-
     def require_login(self, f):
         @wraps(f)
         def is_authenticated(*args, **kwargs):
-            if not self.check():
-                return Redirect()
+            with self.app:
+                if not self.check():
+                    return Redirect()
             return f(*args, **kwargs)
 
         return is_authenticated
