@@ -40,7 +40,7 @@ class Guardian(object):
     def reload_user(self):
         try:
             if self.session.get('user_id'):
-                self.login_user(self.get_user_by_id(self.session.get('user_id')))
+                self.login_user(self.__get_user_by_id(self.session.get('user_id')))
         except AttributeError:
             pass
 
