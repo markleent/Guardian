@@ -130,9 +130,8 @@ class Guardian(object):
     def require_login(self, f):
         @wraps(f)
         def is_authenticated(*args, **kwargs):
-            with self.app:
-                if not self.check():
-                    return Redirect()
+            if not self.check():
+                return Redirect()
             return f(*args, **kwargs)
 
         return is_authenticated
