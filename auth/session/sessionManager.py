@@ -1,8 +1,8 @@
 import sys
-import auth.config
-import auth.session.dictAdapter as dictAdapter
-import auth.session.flaskAdapter as flaskAdapter
-import auth.session.tornadoAdapter as tornadoAdapter
+from .. import config
+from . import dictAdapter
+from . import flaskAdapter
+from . import tornadoAdapter
 
 
 ADAPTERS = {
@@ -19,7 +19,7 @@ class sManager(object):
         pass
 
     def set_session(self, adapter = None):
-        sess_adapter = adapter if adapter else auth.config.G_SESSION
+        sess_adapter = adapter if adapter else config.G_SESSION
         self.adapter = getattr(current_module, ADAPTERS[sess_adapter]).Session
 
         return self.adapter
