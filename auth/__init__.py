@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import auth.hasher as hash
+from . import hasher as hash
 from .authexception import AuthException
 from .redirector import Redirect
-import auth.config
+from . import config
 from functools import wraps
-from auth.models.modelManager import mManager
-from auth.session.sessionManager import sManager
+from .models.modelManager import mManager
+from .session.sessionManager import sManager
 
 import simplevalidator
 
