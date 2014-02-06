@@ -90,7 +90,6 @@ class Guardian(object):
     def user(self):
         return self.auth_user if isinstance(self.auth_user, modelMngr.model) else {}
 
-    ### we don't need to check here for a "false" case, as the authenticate method already take care of that
     def login(self, username, password):
         if (self.authenticate(username = username, password = password)):
             self.session.set('user_id', self.auth_user.id)
@@ -111,6 +110,8 @@ class Guardian(object):
         self.auth_user = None
         self.session.unset('user_id')
 
+    def unset_user(self):
+        self.auth_user = None
 
     def require_login(self, f):
         @wraps(f)
