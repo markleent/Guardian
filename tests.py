@@ -340,7 +340,6 @@ class AuthSessionDefaults:
         self.user_id = Auth.user().id
 
 
-
     def test_reload_user_from_user_id_pass(self):
 
         with self.app:
@@ -357,6 +356,13 @@ class AuthSessionDefaults:
 
             Auth.reload_user()
 
+            self.assertFalse(Auth.user())
+
+    def test_unset_user_pass(self):
+
+        with self.app:
+            Auth.login('admin', 'password')
+            Auth.unset_user()
             self.assertFalse(Auth.user())
 
 
