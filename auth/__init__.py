@@ -36,8 +36,19 @@ class Guardian(object):
     def set_session(self, session = None):
         self.session = sessionMngr.set_session(session)()
 
+    ### This part is framework dependant, i will add a hook later
+    def reload_user(self):
+        try:
+            if self.session.get('user_id'):
+                self.login_user(self.get_user_by_id(self.session.get('user_id')))
+        except AttributeError:
+            pass
+
     def __user_exists(self, username):
         return self.UserModel.find_by_username(username)
+
+    def __get_user_by_id(self, id):
+        return self.UserModel.find(id)
 
     def authenticate(self, **kwargs):
         username = kwargs.get('username', None)
