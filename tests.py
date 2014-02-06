@@ -329,12 +329,36 @@ class AuthSessionDefaults:
 
         with self.app:
             Auth.login('admin', 'password')
-
+        
             @Auth.require_login
             def test_this():
                 return "i am logged in"
 
             self.assertTrue("i am logged in" == test_this())
+
+        ### we store in the instance the user ID ###
+        self.user_id = Auth.user().id
+
+
+
+    def test_reload_user_from_user_id_pass(self):
+
+        with self.app:
+            ### inject in session current saved user_id ###
+            Auth.session.set('user_id', self.user_id)
+
+            Auth.reload_user()
+
+            self.assertTrue(Auth.user().username == 'admin')
+
+    def test_reload_user_from_user_id_fail(self):
+
+        with self.app:
+
+            Auth.reload_user()
+
+            self.assertFalse(Auth.user())
+
 
 
 
@@ -377,6 +401,7 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
         auth.config.G_SESSION = 'Flask'
         Auth.set_settings()
         cls.app = flaskapp.app.test_request_context('/test')
+        cls.user_id = 1
 
     @classmethod
     def tearDownClass(cls):
@@ -390,16 +415,14 @@ class AuthTestsSQL3_FLASK(unittest.TestCase, AuthSessionDefaults):
 
     ### Flask Specific redirector
     def test_check_decorator_not_logged_in(self):
-        
         with self.app:
             @flaskapp.app.route('/test')
             @Auth.require_login
             def test_this():
                 return "i am logged in"
 
-            resp = flaskapp.Response(test_this())
-            resp = flaskapp.app.process_response(resp)
-            print(resp.headers)
+            #resp = flaskapp.Response(test_this())
+            #resp = flaskapp.app.process_response(resp)
             self.assertTrue(302 == test_this().status_code)
 
 """
